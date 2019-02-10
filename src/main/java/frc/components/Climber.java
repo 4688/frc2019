@@ -16,10 +16,13 @@ public class Climber
 	private final double CLIMB_SPD = 1d;
 	
 	// Climb motor CAN index (both motors on same controller)
-	private final int CLIMBER_CAN = 7;
+	private final int FL_CLIMB_PORT = 8;
+	private final int FR_CLIMB_PORT = 9;
+	private final int B_CLIMB_PORT = 10;
+	private final int BD_CLIMB_PORT = 11;
 	
 	// Climb motors
-	private TalonSRX climb;
+	private TalonSRX fl_climb, fr_climb, b_climb, bd_climb;
 	
 	
 	/**
@@ -28,7 +31,10 @@ public class Climber
 	public Climber()
 	{
 		// Climb motors (aptly named by Scott)
-		this.climb = new TalonSRX(CLIMBER_CAN);
+		this.fl_climb = new TalonSRX(FL_CLIMB_PORT);
+		this.fr_climb = new TalonSRX(FR_CLIMB_PORT);
+		this.b_climb = new TalonSRX(B_CLIMB_PORT);
+		this.bd_climb = new TalonSRX(BD_CLIMB_PORT);
 
 		
 	}
@@ -47,11 +53,38 @@ public class Climber
 		// If the robot is retracting the climber and is finished deploying:
 		if (climb == MattDupuis.Climber.Climb)
 		{
-			this.climb.set(ControlMode.PercentOutput, CLIMB_SPD);
+			this.fl_climb.set(ControlMode.PercentOutput, CLIMB_SPD);
 		}
 		else
 		{
-			this.climb.set(ControlMode.PercentOutput, 0d);
+			this.fl_climb.set(ControlMode.PercentOutput, 0d);
 		}
+			// If the robot is retracting the climber and is finished deploying:
+			if (climb == MattDupuis.Climber.Climb)
+			{
+				this.fr_climb.set(ControlMode.PercentOutput, CLIMB_SPD);
+			}
+			else
+			{
+				this.fr_climb.set(ControlMode.PercentOutput, 0d);
+			}
+				// If the robot is retracting the climber and is finished deploying:
+		if (climb == MattDupuis.Climber.Climb)
+		{
+			this.b_climb.set(ControlMode.PercentOutput, CLIMB_SPD);
+		}
+		else
+		{
+			this.b_climb.set(ControlMode.PercentOutput, 0d);
+		}
+			// If the robot is retracting the climber and is finished deploying:
+			if (climb == MattDupuis.Climber.Climb)
+			{
+				this.bd_climb.set(ControlMode.PercentOutput, CLIMB_SPD);
+			}
+			else
+			{
+				this.bd_climb.set(ControlMode.PercentOutput, 0d);
+			}
 	}
 }
