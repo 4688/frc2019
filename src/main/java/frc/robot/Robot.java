@@ -82,11 +82,6 @@ public class Robot extends IterativeRobot
 		this.liftEnc.setDistancePerPulse(1d / ENC_RESOLUTION);
 		System.out.print("Enc");
 		System.out.println(ENC_RESOLUTION);
-
-		if (DriverStation.getInstance().getMatchTime() <= 30d)
-		{
-			this.climber.control(this.matt);
-		}
 	}
 	
 	public void testInit()
@@ -512,39 +507,18 @@ public class Robot extends IterativeRobot
 	{
 		private int deployed;
 		private boolean activated;
-		private TalonSRX climb;
+		private TalonSRX fl_climb, fr_climb, b_climb, bd_climb;
 		
 		public Climber()
 		{
-			this.climb = new TalonSRX(8);
-			this.climb = new TalonSRX(9);
-			this.climb = new TalonSRX(10);
-			this.climb = new TalonSRX(11);
+			this.fl_climb = new TalonSRX(8);
+			this.fr_climb = new TalonSRX(9);
+			this.b_climb = new TalonSRX(10);
+			this.bd_climb = new TalonSRX(11);
 			this.deployed = 0;
 			this.activated = false;
 		}
 		
-		public void control(MattDupuis matt)
-		{
-			double climb = matt.getClimb();
-			if (matt.getDeploy())
-			{
-				this.deployed = 30;
-			}
-			if (this.deployed > 0 && !this.activated)
-			{
-				this.climb.set(ControlMode.PercentOutput, -1d);
-				this.deployed -= 1;
-				if (this.deployed <= 0)
-				{
-					this.activated = true;
-				}
-			}
-			if (this.activated)
-			{
-				this.climb.set(ControlMode.PercentOutput, climb);
-			}
-		}
 	}
 	
 	private static class Autonomous
