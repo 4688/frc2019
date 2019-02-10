@@ -1,4 +1,3 @@
-// JACOB CAZABON <3 SAINTS BOT 2018
 
 package frc.robot;
 
@@ -104,7 +103,7 @@ public class Robot extends IterativeRobot
 		private NetworkTableEntry allianceEntry, stationEntry;
 		private NetworkTableEntry platesEntry;
 		private NetworkTableEntry routineEntry;
-		private NetworkTableEntry driveEncValueEntry, gyroValueEntry;
+		private NetworkTableEntry driveEncValueEntry;
 		private NetworkTableEntry tiltEncValueEntry;
 		private NetworkTableEntry liftEncValueEntry;
 		private CameraServer camera;
@@ -125,7 +124,6 @@ public class Robot extends IterativeRobot
 			this.platesEntry = this.table.getEntry("plates");
 			this.routineEntry = this.table.getEntry("routine");
 			this.driveEncValueEntry = this.table.getEntry("driveEncValue");
-			this.gyroValueEntry = this.table.getEntry("gyroValue");
 			this.tiltEncValueEntry = this.table.getEntry("tiltEncValue");
 			this.liftEncValueEntry = this.table.getEntry("liftEncValue");
 			this.camera = CameraServer.getInstance();
@@ -512,13 +510,16 @@ public class Robot extends IterativeRobot
 	
 	private static class Climber
 	{
-		private VictorSPX reacher;
 		private int deployed;
 		private boolean activated;
+		private TalonSRX climb;
 		
 		public Climber()
 		{
-			this.reacher = new VictorSPX(7);
+			this.climb = new TalonSRX(8);
+			this.climb = new TalonSRX(9);
+			this.climb = new TalonSRX(10);
+			this.climb = new TalonSRX(11);
 			this.deployed = 0;
 			this.activated = false;
 		}
@@ -532,7 +533,7 @@ public class Robot extends IterativeRobot
 			}
 			if (this.deployed > 0 && !this.activated)
 			{
-				this.reacher.set(ControlMode.PercentOutput, -1d);
+				this.climb.set(ControlMode.PercentOutput, -1d);
 				this.deployed -= 1;
 				if (this.deployed <= 0)
 				{
@@ -541,7 +542,7 @@ public class Robot extends IterativeRobot
 			}
 			if (this.activated)
 			{
-				this.reacher.set(ControlMode.PercentOutput, climb);
+				this.climb.set(ControlMode.PercentOutput, climb);
 			}
 		}
 	}

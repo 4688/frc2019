@@ -19,7 +19,7 @@ public class Climber
 	private final int CLIMBER_CAN = 7;
 	
 	// Climb motors
-	private TalonSRX reacher;
+	private TalonSRX climb;
 	
 	
 	/**
@@ -28,7 +28,8 @@ public class Climber
 	public Climber()
 	{
 		// Climb motors (aptly named by Scott)
-		this.reacher = new TalonSRX(CLIMBER_CAN);
+		this.climb = new TalonSRX(CLIMBER_CAN);
+
 		
 	}
 	
@@ -46,11 +47,11 @@ public class Climber
 		// If the robot is retracting the climber and is finished deploying:
 		if (climb == MattDupuis.Climber.Climb)
 		{
-			this.reacher.set(ControlMode.PercentOutput, CLIMB_SPD);
+			this.climb.set(ControlMode.PercentOutput, CLIMB_SPD);
 		}
 		else
 		{
-			this.reacher.set(ControlMode.PercentOutput, 0d);
+			this.climb.set(ControlMode.PercentOutput, 0d);
 		}
 	}
 }
