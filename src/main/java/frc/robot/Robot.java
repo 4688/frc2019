@@ -8,6 +8,7 @@ import com.ctre.phoenix.motorcontrol.can.*;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj.*;
 
+//Hunter is setup and taught git
 public class Robot extends IterativeRobot
 {
 	private final int JOYSTICK_USB = 0;
