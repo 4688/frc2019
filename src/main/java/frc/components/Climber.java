@@ -59,15 +59,15 @@ public class Climber
 		{
 			this.fl_climb.set(ControlMode.PercentOutput, 0d);
 		}
-			// If the robot is retracting the climber and is finished deploying:
-			if (climb == MattDupuis.Climber.Climb)
-			{
-				this.fr_climb.set(ControlMode.PercentOutput, CLIMB_SPD);
-			}
-			else
-			{
-				this.fr_climb.set(ControlMode.PercentOutput, 0d);
-			}
+		// If the robot is retracting the climber and is finished deploying:
+		if (climb == MattDupuis.Climber.Climb)
+		{
+			this.fr_climb.set(ControlMode.PercentOutput, CLIMB_SPD);
+		}
+		else
+		{
+			this.fr_climb.set(ControlMode.PercentOutput, 0d);
+		}
 				// If the robot is retracting the climber and is finished deploying:
 		if (climb == MattDupuis.Climber.Climb)
 		{
@@ -77,14 +77,14 @@ public class Climber
 		{
 			this.b_climb.set(ControlMode.PercentOutput, 0d);
 		}
-			// If the robot is retracting the climber and is finished deploying:
-			if (climb == MattDupuis.Climber.Climb)
-			{
-				this.bd_climb.set(ControlMode.PercentOutput, CLIMB_SPD);
-			}
-			else
-			{
-				this.bd_climb.set(ControlMode.PercentOutput, 0d);
-			}
+		// If the robot is retracting the climber and is finished deploying:
+		if (climb == MattDupuis.Climber.Climb)
+		{
+			this.bd_climb.set(ControlMode.PercentOutput, CLIMB_SPD);
+		}
+		else
+		{
+			this.bd_climb.set(ControlMode.PercentOutput, 0d);
+		}
 	}
 }
