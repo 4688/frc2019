@@ -374,21 +374,6 @@ public class Dashboard
 	}
 	
 	/**
-	 * Sends the climber deploy status to the dashboard.
-	 * 
-	 * @param climber The Climber object to monitor
-	 */
-	public void updateClimber(Climber climber)
-	{
-		if (this.timer % (50 / UPDATE_RATE) == 0)
-		{
-			// Update deploy status
-			boolean deployed = climber.isDeployed();
-			this.deployedEntry.setBoolean(deployed);
-		}
-	}
-	
-	/**
 	 * Sends the autonomous routine number and PID gains/error to the dashboard.
 	 * 
 	 * @param auto The Autonomous object to monitor
