@@ -134,8 +134,8 @@ public class Hugger
 		this.setTiltSpd(spd);
 		
 		// Set controller rumble for limit switches
-		matt.rumbleRight(!this.lowLim.get());
-		matt.rumbleLeft(!this.highLim.get());
+		//matt.rumbleRight(!this.lowLim.get());
+		//matt.rumbleLeft(!this.highLim.get());
 	}
 	
 	/**
