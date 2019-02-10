@@ -1,4 +1,4 @@
-// JACOB CAZABON <3 SAINTS BOT 2018
+// Brandon Mailloux 2019 - 4688 Saints Bot		#Based on Jacob 2018
 
 package frc.components;
 
@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
  * Reads and processes input from the robot driver (after whom this class is
  * honourably named) through both the main Xbox controller and the button board.
  * 
- * @author Jacob
+ * @author Brandon
  */
 public class MattDupuis
 {
@@ -36,14 +36,8 @@ public class MattDupuis
 	private final int TILTUP_BBTN = 7;
 	private final int TILTDN_BBNT = 9;
 	
-	// Length of rumble, in 1/50ths of a second
-	private final int RUMBLE_TIME = 15;
-	
 	// Xbox controller and button board
 	private Joystick driver, board;
-	
-	// Rumble timers
-	private int rumbleL, rumbleR;
 	
 	/**
 	 * Constructor.
@@ -53,68 +47,6 @@ public class MattDupuis
 		// Initialize joysticks
 		this.driver = new Joystick(DRIVER_USB);
 		this.board = new Joystick(BOARD_USB);
-		
-		// Initialize rumble timers
-		this.rumbleL = 0;
-		this.rumbleR = 0;
-	}
-	
-	/**
-	 * Updates the rumble pulse of the controller based on whether a switch is
-	 * pressed. The controller should only pulse each time the switch is pressed
-	 * and only once until it is released.
-	 * 
-	 * @param pressed True if the switch is pressed, false otherwise
-	 */
-	public void rumbleRight(boolean pressed)
-	{
-		// Activate rumble if switch is pressed
-		if (false && ((pressed && this.rumbleR == 0) || this.rumbleR > 0))
-		{
-			double rumble = Math.sqrt(RUMBLE_TIME - this.rumbleR) / Math.sqrt(RUMBLE_TIME);
-			if (Double.isNaN(rumble) && !pressed)
-			{
-				this.rumbleR = 0;
-			}
-			else
-			{
-				this.rumbleR += 1;
-			}
-			this.driver.setRumble(RumbleType.kRightRumble, rumble);
-		}
-		else
-		{
-			this.rumbleR = 0;
-		}
-	}
-	
-	/**
-	 * Updates the rumble pulse of the controller based on whether a switch is
-	 * pressed. The controller should only pulse each time the switch is pressed
-	 * and only once until it is released.
-	 * 
-	 * @param pressed True if the switch is pressed, false otherwise
-	 */
-	public void rumbleLeft(boolean pressed)
-	{
-		// Activate rumble if switch is pressed 
-		if (false && ((pressed && this.rumbleL == 0) || this.rumbleL > 0))
-		{
-			double rumble = Math.sqrt(RUMBLE_TIME - this.rumbleL) / Math.sqrt(RUMBLE_TIME);
-			if (Double.isNaN(rumble) && !pressed)
-			{
-				this.rumbleL = 0;
-			}
-			else
-			{
-				this.rumbleL += 1;
-			}
-			this.driver.setRumble(RumbleType.kLeftRumble, rumble);
-		}
-		else
-		{
-			this.rumbleL = 0;
-		}
 	}
 	
 	/**
@@ -164,8 +96,16 @@ public class MattDupuis
 	 */
 	public double getIntake()
 	{
-		boolean reverse = this.driver.getRawButton(EJECT_DBTN);
-		return this.driver.getRawAxis(INTAKE_DAXIS) * (reverse ? -1d : 1d);
+		if (this.driver.getRawAxis(INTAKE_DAXIS) > 0 ) 
+		{
+			return this.driver.getRawAxis(INTAKE_DAXIS);
+		}else{
+			if (this.driver.getRawButton(RAISE_DBTN)){
+				return (-1d);
+			}
+		}
+
+		return 0;
 	}
 	
 	/**
