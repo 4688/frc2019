@@ -240,7 +240,7 @@ public class Robot extends IterativeRobot{
 			double l = 0d, r = 0d;
 			double d = DRIVE_FACTOR;
 			double t = matt.getTurbo();
-			double e = 1d; // Math.min(Math.max(0, -(k_max / Math.pow(E_max,2))*Math.pow(liftTravel,2) + 1), 1);
+			double e = Math.min(Math.max(0, -(k_max / Math.pow(E_max,2))*Math.pow(liftTravel,2) + 1), 1);
 			if (Math.abs(x) < 0.04)
 			{
 				l = y;
@@ -339,11 +339,7 @@ public class Robot extends IterativeRobot{
 			}
 			else  
 			{
-				if (!this.lowLim.get()){
-					this.lifty.set(0d);	
-				}else{
-					this.lifty.set(0.4d);	
-				}		
+				this.lifty.set(0d);	
 			}
 		}
 		
