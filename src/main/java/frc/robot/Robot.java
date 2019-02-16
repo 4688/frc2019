@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.*;
 import com.ctre.phoenix.motorcontrol.can.*;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobot{
 
@@ -15,6 +16,7 @@ public class Robot extends IterativeRobot{
 	private Grabber grabber;
 	private Lift lift;
 	private Climber climber;
+	private Wrist wrist;
 	
 	public void robotInit()
 	{
@@ -23,10 +25,12 @@ public class Robot extends IterativeRobot{
 		this.grabber = new Grabber();
 		this.lift = new Lift();
 		this.climber = new Climber();
+		this.wrist = new Wrist();
 	}
 	
 	public void robotPeriodic()
 	{
+
 		if (RobotController.getUserButton())
 		{
 			this.driveTrain.zeroSensors();
@@ -48,10 +52,16 @@ public class Robot extends IterativeRobot{
 	
 	public void teleopPeriodic()
 	{
+
+		SmartDashboard.putBoolean("Top", lift.highLim.get());
+		SmartDashboard.putBoolean("Bottom", lift.lowLim.get());
+		SmartDashboard.putBoolean("HighLim", wrist.highLim.get());
+		SmartDashboard.putNumber("Lift Encoder", lift.liftEnc.getRaw());
 		this.driveTrain.control(this.matt, this.lift.getTravel());
 		this.grabber.control(this.matt);
-    this.lift.control(this.matt);
-    this.climber.control(this.matt);
+   		this.lift.control(this.matt);
+		this.climber.control(this.matt);
+		this.wrist.control(this.matt);
 		
 		if (DriverStation.getInstance().getMatchTime() <= 30d)
 		{
@@ -90,44 +100,61 @@ public class Robot extends IterativeRobot{
 			return 1d + this.joystick.getRawAxis(3) * 0.5;
 		}
 		
-				public double getIntake()
+		public double getIntake()
 		{
-			boolean inBtn = this.joystick.getRawButton(6);
-			boolean reverseBtn = this.joystick.getRawButton(2);
-			double in = inBtn ? -0.8d : 0d;
-			double reverse = reverseBtn ? -1d : 1d;
-			if (!inBtn && reverseBtn) return 0.25d;
-			return in * reverse;
+			double inVal = (this.joystick.getRawAxis(3) * -0.5);
+			if(this.joystick.getRawButton(2)){
+				inVal = 1d;
+			}
+			return(inVal);
 		}
+
+		public double getWrist()
+	{
+		// Get DPad value
+		int dpad = this.joystick.getPOV();
+		
+		if (dpad == 0) return 1;
+		
+		// If pressing DPad down, tilt down
+		else if (dpad == 180) return -1;
+				
+		else return 0;
+	}
 		
 		public double getLift()
 		{
-			boolean up = this.joystick.getRawButton(4);
-			boolean dn = this.joystick.getRawButton(3);
+			boolean up = this.joystick.getRawButton(6);
+			boolean dn = this.joystick.getRawButton(5);
 			if (up && !dn)
 			{
-				return 0.9d;
+				return 1d;
 			}
 			else if (!up && dn)
 			{
-				return -0.6d;
+				return -0.2d;
 			}
 			else
 			{
 				return 0d;
 			}
-    }
+	}
+	
+	public boolean getPistons(){
+		return(this.joystick.getRawButton(1));
+	}
+
     public double all3()
 		{
-			boolean all3up = this.ds_button.getRawButton(1);
-			boolean all3down = this.ds_button.getRawButton(2);
+			boolean all3up = this.ds_button.getRawButton(2);
+			boolean all3down = this.ds_button.getRawButton(1);
 			if (all3up && !all3down)
 			{
-				return 0.9d;
+				return 1d;
 			}
 			else if (!all3up && all3down)
 			{
-				return -0.9d;
+				return -1d;
 			}
 			else
 			{
@@ -141,11 +168,11 @@ public class Robot extends IterativeRobot{
 			boolean front2down = this.ds_button.getRawButton(4);
 			if (front2up && !front2down)
 			{
-				return 0.9d;
+				return 1d;
 			}
 			else if (!front2up && front2down)
 			{
-				return -0.9d;
+				return -1d;
 			}
 			else
 			{
@@ -158,7 +185,7 @@ public class Robot extends IterativeRobot{
 			boolean back_drive = this.ds_button.getRawButton(5);
 			if (back_drive)
 			{
-				return 0.9d;
+				return 1d;
 			}
 			else
 			{
@@ -172,34 +199,25 @@ public class Robot extends IterativeRobot{
 			boolean back_leg_down = this.ds_button.getRawButton(7);
 			if (back_leg_up && !back_leg_down)
 			{
-				return 0.9d;
+				return 1d;
 			}
 			else if (!back_leg_up && back_leg_down)
 			{
-				return -0.9d;
+				return -1d;
 			}
 			else
 			{
 				return 0d;
 			}
 		}
-		
-		public boolean getDeploy()
-		{
-			boolean pressed1 = this.joystick.getRawButton(7);
-			boolean pressed2 = this.joystick.getRawButton(8);
-			return pressed1 && pressed2;
-		}
-		
-		public double getClimb()
-		{
-			return this.joystick.getRawButton(1) ? -1d : 0d;
-		}
 	}
 	
 	private static class DriveTrain
 	{
 		private static final double DRIVE_FACTOR = 0.5;
+
+		private static final double k_max = 0.5; // Maximum speed at max lift height
+		private static final double E_max = -7d; // Encoder value at maximum height; needs testing
 		
     private TalonSRX lfm, rfm;
     private VictorSPX lrm, rrm;
@@ -222,7 +240,7 @@ public class Robot extends IterativeRobot{
 			double l = 0d, r = 0d;
 			double d = DRIVE_FACTOR;
 			double t = matt.getTurbo();
-			double e = Math.min(1d / (1d + liftTravel / 4d), 1d);
+			double e = 1d; // Math.min(Math.max(0, -(k_max / Math.pow(E_max,2))*Math.pow(liftTravel,2) + 1), 1);
 			if (Math.abs(x) < 0.04)
 			{
 				l = y;
@@ -280,16 +298,21 @@ public class Robot extends IterativeRobot{
 	private static class Grabber
 	{
 		private VictorSPX grabber;
+		private Solenoid pistons;
+		private Compressor compressor;
 		
 		public Grabber()
 		{
 			this.grabber = new VictorSPX(7);
+			this.pistons = new Solenoid(1, 0);
+			this.compressor = new Compressor(1);
+			compressor.setClosedLoopControl(true);
 		}
 		
 		public void control(MattDupuis matt)
 		{
-			double intake = matt.getIntake();
-			this.grabber.set(ControlMode.PercentOutput, intake);
+			this.grabber.set(ControlMode.PercentOutput, matt.getIntake());
+			this.pistons.set(matt.getPistons());
 		}
 	}
 	
@@ -297,42 +320,31 @@ public class Robot extends IterativeRobot{
 	{
 		private DigitalInput lowLim, highLim;
 		private Spark lifty;
-		private Servo lock;
 		private Encoder liftEnc;
 		
 		public Lift()
 		{
 			this.lowLim = new DigitalInput(2);
 			this.highLim = new DigitalInput(3);
-			this.lifty = new Spark(1);
-			this.lock = new Servo(2);
+			this.lifty = new Spark(5);
 			this.liftEnc = new Encoder(6, 7);
-			this.liftEnc.setDistancePerPulse(1d / 2048d);
+			this.liftEnc.setDistancePerPulse(1d / 2048d); // May need to adjust resolution
 		}
 		
-		public void control(MattDupuis matt)
-		{
+		public void control(MattDupuis matt){
 			double lift = matt.getLift();
-			if ((lift < -0.04 && this.lowLim.get()) || (lift > 0.04 && this.highLim.get()))
+			if ((lift < 0d && this.lowLim.get()) || (lift > 0d && this.highLim.get()))
 			{
-				this.disengageLock();
 				this.lifty.set(lift);
 			}
-			else
+			else  
 			{
-				this.engageLock();
-				this.lifty.set(0d);
+				if (!this.lowLim.get()){
+					this.lifty.set(0d);	
+				}else{
+					this.lifty.set(0.4d);	
+				}		
 			}
-		}
-		
-		private void engageLock()
-		{
-			this.lock.set(0.6d);
-		}
-		
-		private void disengageLock()
-		{
-			this.lock.set(1d);
 		}
 		
 		public void zeroSensors()
@@ -345,11 +357,32 @@ public class Robot extends IterativeRobot{
 			return -this.liftEnc.getDistance();
 		}
 	}
+
+	public static class Wrist{
+
+		private VictorSPX wrist;
+		private DigitalInput lowLim, highLim;
+
+		public Wrist()
+		{
+			this.wrist = new VictorSPX(6);
+			this.highLim = new DigitalInput(9);
+			this.lowLim = new DigitalInput(4);
+		}
+		public void control(MattDupuis matt){
+			double spd = matt.getWrist();
+			if (!this.highLim.get() || spd < 0){
+				this.wrist.set(ControlMode.PercentOutput, spd);
+			}else{
+				this.wrist.set(ControlMode.PercentOutput, 0d);
+			}
+		}
+	}
+
+	// (this.lowLim.get() || spd > 0) && 
+	
 	
   public class Climber{
-
-		// Motor speed for climbing
-		private final double CLIMB_SPD = 1d;
 		
 		// Climb motor CAN index (both motors on same controller)
 		private final int FL_CLIMB_PORT = 8;
@@ -381,17 +414,21 @@ public class Robot extends IterativeRobot{
 				double front2value = matt.front2();
 				double back_drive_value = matt.back_drive();
 				double back_legs_value = matt.back_legs();
+				double back_percent = 1d;
+				double front_left_percent = 1d;
+				double front_right_percent = 1d;
+
 				if (all3value != 0)
 				{
-					this.fl_climb.set(ControlMode.PercentOutput, all3value);
-					this.fr_climb.set(ControlMode.PercentOutput, all3value);
-					this.b_climb.set(ControlMode.PercentOutput, all3value);
+					this.fl_climb.set(ControlMode.PercentOutput, (all3value * front_left_percent));
+					this.fr_climb.set(ControlMode.PercentOutput, (all3value * front_right_percent));
+					this.b_climb.set(ControlMode.PercentOutput, (all3value * back_percent));
 				}
 				else
 				{
-					this.fl_climb.set(ControlMode.PercentOutput, front2value);
-					this.fr_climb.set(ControlMode.PercentOutput, front2value);
-					this.b_climb.set(ControlMode.PercentOutput, back_legs_value);
+					this.fl_climb.set(ControlMode.PercentOutput, (front2value * front_left_percent));
+					this.fr_climb.set(ControlMode.PercentOutput, (front2value * front_right_percent));
+					this.b_climb.set(ControlMode.PercentOutput, (back_legs_value * back_percent));
 				}
 				
 				this.bd_climb.set(ControlMode.PercentOutput, back_drive_value);
